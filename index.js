@@ -5,7 +5,7 @@ var app = express();
 var router = express.Router();
 var routes = require('./routes');
 
-app.use('/static', express.static('public'));
+app.use('/static', express.static(__base + 'public'));
 app.set('view engine', 'pug');
 
 app.use('/', routes);
