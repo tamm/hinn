@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+        <link rel="stylesheet" href="/static/angular/angular-material.css">
+        <link rel="stylesheet" href="/static/angular/angular-material-icons.css">
+    </head>
+    <body ng-app="HinnMed" layout-fill>
+        <div ng-controller="HinnMedController" layout="column" layout-fill>
+            <main layout="row" flex>
+                <md-content flex ng-if="!origin">
+                    <md-list ng-cloak>
+                        <md-list-item ng-repeat="stop in nearbystops" class="noright" ng-click="selectOrigin(stop)">
+                            <md-icon md-svg-icon="phone" ng-class="{'md-avatar-icon': true}"></md-icon>
+                            <p>{{ stop.name }}, {{ stop.track }}</p>
+                        </md-list-item>
+                    </md-list>   
+                </md-content>
+
+                <md-content flex ng-if="origin">
+                    <div layout-padding>
+                        {{ origin.name }}
+                    </div>
+                    <md-list ng-cloak>
+                        <md-list-item ng-repeat="departure in departureBoard.Departure">
+                            <md-icon md-svg-icon="phone" ng-class="{'md-avatar-icon': true}">{{ departure.type }}</md-icon>
+                            <p>{{ departure.sname }}, {{ departure.track }} <span am-time-ago="departure.date + ' ' + departure.time">{{ departure.time }}</span></p>
+                        </md-list-item>
+                    </md-list>   
+                </md-content>
+            </main>
+
+            <md-toolbar md-scroll-shrink ng-if="true">
+                <div class="md-toolbar-tools">
+                    <h3 flex>
+                        <span>{{title}}</span>
+                    </h3>
+                    <md-button class="md-icon-button" aria-label="More" ng-click="showInfo()">
+                        <md-icon md-svg-icon="more"  md-svg-src="{{ insertDriveIconURL }}"></md-icon>
+                    </md-button>
+                </div>
+            </md-toolbar>
+        </div>
+        <script src="/static/angular/moment.js"></script>
+        <script src="/static/angular/angular.js"></script>
+        <script src="/static/angular/angular-aria.js"></script>
+        <script src="/static/angular/angular-animate.js"></script>
+        <script src="/static/angular/angular-material.js"></script>
+        <script src="/static/angular/angular-moment.js"></script>
+        <script src="/static/angular/angular-material-icons.js"></script>
+        <script src="/static/angular/angular-cookies.min.js"></script>
+        <script src="/static/angular/query-string.js"></script>
+
+        <script src="/static/oauth2.js"></script>
+        <script src="/static/app.js"></script>
+    </body>
+</html>
