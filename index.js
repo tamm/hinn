@@ -1,4 +1,5 @@
 global.__base = __dirname + '/';
+var fs = require('fs');
 
 var express = require('express');
 var app = express();
@@ -11,16 +12,27 @@ app.set('view engine', 'pug');
 
 app.use('/', routes);
 
-// app.listen(8080, function () {
-//   console.log('Example app listening on port 8080!');
-// });
+try {
+	var privateKey = fs.readFileSync( '/ssl/privatekey.pem' );
+} catch (error) {
+	console.log(error);
+}
+try {
+	var certificate = fs.readFileSync( '/ssl/certificate.pem' );
+} catch (error) {
+	console.log(error);
+}
 
-var privateKey = fs.readFileSync( 'ssl/privatekey.pem' );
-var certificate = fs.readFileSync( 'ssl/certificate.pem' );
-
-https.createServer({
-    key: privateKey,
-    cert: certificate
-}, app).listen(443);
+if (privateKey && certificate) {
+	  console.log('Hinn Med listening on port 443!');
+	https.createServer({
+	    key: privateKey,
+	    cert: certificate
+	}, app).listen(443);
+} else {
+	app.listen(8080, function () {
+	  console.log('Hinn Med listening on port 8080!');
+	});
+}
 
 module.exports = router;
