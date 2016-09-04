@@ -4,43 +4,121 @@
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
         <link rel="stylesheet" href="/static/angular/angular-material.css">
         <link rel="stylesheet" href="/static/angular/angular-material-icons.css">
+
+        <style type="text/css">
+            .loadingVeil {
+                display: block;
+                background: white;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 100000;
+            }
+            .loadingVeil:after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                margin-top: -30px;
+                margin-left: -30px;
+                height: 60px;
+                width: 60px;
+                border-radius: 30px;
+                border-width: 3px;
+                border-color: black;
+                border-style: solid;
+                box-sizing: border-box;
+                border-left-color: transparent;
+                border-right-color: transparent;
+                -webkit-animation: spin 1s linear infinite;
+                -moz-animation: spin 1s linear infinite;
+                animation: spin 1s linear infinite;
+            }
+            @-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+            @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+            @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+            .loadingVeil.revealPage {
+                display: none;
+            }
+
+            .no-min-width {
+                min-width: 0;
+            }
+            .md-avatar-icon-margin {
+                margin-top: 8px;
+                margin-bottom: 8px;
+                margin-right: 16px;
+                margin-left: 0px;
+            }
+        </style>
     </head>
     <body ng-app="HinnMed" layout-fill>
         <div ng-controller="HinnMedController" layout="column" layout-fill>
-            <main layout="row" flex>
-                <md-content flex ng-if="!origin">
+            <main layout="column" flex ng-if="!origin">
+                <md-toolbar layout="row">
+                    <div class="md-toolbar-tools">
+                        <h3 flex>Traveling from</h3>
+                    </div>
+                </md-toolbar>
+                <md-content flex>
                     <md-list ng-cloak>
                         <md-list-item ng-repeat="stop in nearbystops" class="noright" ng-click="selectOrigin(stop)">
-                            <md-icon md-svg-icon="phone" ng-class="{'md-avatar-icon': true}"></md-icon>
+                            <ng-md-icon icon="location_on" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
                             <p>{{ stop.name }}, {{ stop.track }}</p>
-                        </md-list-item>
-                    </md-list>   
-                </md-content>
-
-                <md-content flex ng-if="origin">
-                    <div layout-padding>
-                        {{ origin.name }}
-                    </div>
-                    <md-list ng-cloak>
-                        <md-list-item ng-repeat="departure in departureBoard.Departure">
-                            <md-icon md-svg-icon="phone" ng-class="{'md-avatar-icon': true}">{{ departure.type }}</md-icon>
-                            <p>{{ departure.sname }}, {{ departure.track }} <span am-time-ago="departure.date + ' ' + departure.time">{{ departure.time }}</span></p>
                         </md-list-item>
                     </md-list>   
                 </md-content>
             </main>
 
-            <md-toolbar md-scroll-shrink ng-if="true">
+            <main layout="column" flex ng-if="origin">
+                <md-toolbar layout="row">
+                    <div class="md-toolbar-tools">
+                        <md-button class="md-icon-button" aria-label="back" ng-click="removeOrigin()">
+                            <ng-md-icon icon="arrow_back"></ng-md-icon>
+                        </md-button>  
+                        <h3 flex>{{ origin.name }}</h3>
+                    </div>
+                </md-toolbar>
+                <md-content flex>
+
+                    <md-list ng-cloak>
+                        <md-list-item ng-repeat="departure in departures">
+                            <div class="md-avatar-icon" ng-style="departure.style" ng-if="departure.icon">
+                                <ng-md-icon icon="{{ departure.icon }}"></ng-md-icon>
+                            </div>
+                            <div ng-if="!departure.icon">
+                                <div class="md-button no-min-width md-avatar-icon-margin" ng-style="departure.style">
+                                    <span>{{ departure.sname }}</span>
+                                </div>
+                            </div>
+                            <p>
+                                {{ departure.direction }}, {{ departure.track }} <span am-time-ago="departure.rtDate + 'T' + departure.rtTime">{{ departure.time }}</span>
+                                <i>{{departure.difference}}</i>
+                            </p>
+                        </md-list-item>
+                    </md-list> 
+
+                </md-content>
+            </main>
+
+            <md-toolbar>
                 <div class="md-toolbar-tools">
                     <h3 flex>
                         <span>{{title}}</span>
                     </h3>
                     <md-button class="md-icon-button" aria-label="More" ng-click="showInfo()">
-                        <md-icon md-svg-icon="more"  md-svg-src="{{ insertDriveIconURL }}"></md-icon>
+                        <ng-md-icon icon="info_outline"></ng-md-icon>
                     </md-button>
                 </div>
             </md-toolbar>
+
+            <div class="loadingVeil" ng-class="{revealPage: !loading}"></div>
         </div>
+
+
         <script src="/static/angular/moment.js"></script>
         <script src="/static/angular/angular.js"></script>
         <script src="/static/angular/angular-aria.js"></script>
