@@ -16,7 +16,7 @@ router.get('/showInfoDialog.html', function (req, res) {
 });
 
 var requiredModules = [];
-var modules = fs.readdirSync('modules');
+var modules = fs.readdirSync(__base + 'modules');
 modules.forEach(function(module) {
 	var moduleDirPath = 'modules/' + module;
 	var moduleFiles = fs.readdirSync(moduleDirPath);
