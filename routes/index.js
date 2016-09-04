@@ -19,7 +19,7 @@ var requiredModules = [];
 var modules = fs.readdirSync(__base + 'modules');
 modules.forEach(function(module) {
 	var moduleDirPath = 'modules/' + module;
-	var moduleFiles = fs.readdirSync(moduleDirPath);
+	var moduleFiles = fs.readdirSync(__base + moduleDirPath);
 
 	if (moduleFiles.indexOf('init.js') >= 0) {
 		moduleInit = require(__base + moduleDirPath + '/init.js');
@@ -27,7 +27,7 @@ modules.forEach(function(module) {
 	}
 	if (moduleFiles.indexOf('routes.js') >= 0) {
 		requiredModules[module] = require(__base + moduleDirPath + '/routes.js');
-		app.use('/' + module + '/static', express.static(moduleDirPath + 'public'));
+		app.use('/' + module + '/static', express.static(__base + moduleDirPath + 'public'));
 		router.use('/' + module, requiredModules[module]);
 	}
 });
