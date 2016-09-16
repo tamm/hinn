@@ -25,10 +25,14 @@ try {
 
 if (privateKey && certificate) {
 	  console.log('Hinn Med listening on port 443!');
-	https.createServer({
+	var server = https.createServer({
 	    key: privateKey,
 	    cert: certificate
 	}, app).listen(443);
+	server.on('error', function (e) {
+	  // Handle your error here
+	  console.log(e);
+	});
 } else {
 	app.listen(8080, function () {
 	  console.log('Hinn Med listening on port 8080!');

@@ -53,6 +53,26 @@
                 margin-right: 16px;
                 margin-left: 0px;
             }
+            .departureBoard {
+                border-width: 0;
+                border-collapse: separate;
+                border-spacing: 0 0;
+                width: 100%;
+            }
+            .departureBoard tr td {
+                padding: 0 5px;
+            }
+            .departureBoard tr:nth-child(even) td {
+                background: #E3ECF5;
+            }
+            .departureBoard tr td ng-md-icon {
+                margin: 0;
+            }
+            .icon-circle {
+                border-radius: 50%;
+                padding: 8px;
+                margin: 2px 0;
+            }
         </style>
     </head>
     <body ng-app="HinnMed" layout-fill>
@@ -85,20 +105,40 @@
                 <md-content flex>
 
                     <md-list ng-cloak>
-                        <md-list-item ng-repeat="departure in departures">
-                            <div class="md-avatar-icon" ng-style="departure.style" ng-if="departure.icon">
-                                <ng-md-icon icon="{{ departure.icon }}"></ng-md-icon>
-                            </div>
-                            <div ng-if="!departure.icon">
-                                <div class="md-button no-min-width md-avatar-icon-margin" ng-style="departure.style">
-                                    <span>{{ departure.sname }}</span>
-                                </div>
-                            </div>
-                            <p>
-                                {{ departure.direction }}, {{ departure.track }} <span am-time-ago="departure.rtDate + 'T' + departure.rtTime">{{ departure.time }}</span>
-                                <i>{{departure.difference}}</i>
-                            </p>
-                        </md-list-item>
+                        <table class="departureBoard">
+                            <tr>
+                                <th>Linje</th>
+                                <th>Plats</th>
+                                <th>Riktning</th>
+                                <th colspan="4">Nästa avgång</th>
+                            </tr>
+                            <tr ng-repeat="departureBoardLine in departureBoardLines">
+                                <td align="center" ng-if="departureBoardLine.departures[0].icon">
+                                    <ng-md-icon ng-style="departureBoardLine.departures[0].style" class="icon-circle" icon="{{ departureBoardLine.departures[0].icon }}"></ng-md-icon>
+                                </td>
+                                <td align="center" ng-if="!departureBoardLine.departures[0].icon">
+                                    <div class="md-button no-min-width" ng-style="departureBoardLine.departures[0].style">
+                                        <span>{{ departureBoardLine.departures[0].sname }}</span>
+                                    </div>
+                                </td>
+                                <td align="center">{{ departureBoardLine.departures[0].track }}</td>
+                                
+                                <td ng-if="!departureBoardLine.departures[0].directionLine2" flex>
+                                    {{ departureBoardLine.departures[0].directionLine1 }}
+                                </td>
+                                <td ng-if="departureBoardLine.departures[0].directionLine2" flex>
+                                    <div>{{ departureBoardLine.departures[0].directionLine1 }}</div>
+                                    <small>{{ departureBoardLine.departures[0].directionLine2 }}</small>
+                                </td>
+                                <td align="center" ng-repeat="departure in departureBoardLine.departures">
+                                    <span ng-if="departure.empty !== true">                                    
+                                        <span ng-if="departureBoardLine.departures.length > 1 || departure.minutesUntil <= 60">{{ departure.minutesUntil }} </span>
+                                        <span ng-if="departureBoardLine.departures.length === 1 && departure.minutesUntil > 60" am-time-ago="departure.rtFull"></span>
+                                        <i ng-if="departure.difference !== 0"> ({{ departure.difference }})</i>
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
                     </md-list> 
 
                 </md-content>

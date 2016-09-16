@@ -22,8 +22,6 @@ var ngModule = angular.module('oauth2', [
 	.factory('oauthInterceptor', ['$q', '$rootScope', 'OAuthToken', function oauthInterceptor($q, $rootScope, OAuthToken) {
 	  return {
 	    request: function(config) {
-	    	console.log('intercepting request');
-	    	console.log(config);
 	      config.headers = config.headers || {};
 
 	      // Inject `Authorization` header.
@@ -67,12 +65,11 @@ var ngModule = angular.module('oauth2', [
 	  this.configure = function(params) {
 	    // Can only be configured once.
 	    try {
-		    if (undefined === config) {
+		    if (typeof(config) !== 'undefined') {
 		      throw new Error('Already configured.');
 		    }
-	    } catch(error) {
-	    	console.log('we are happy');
-	    	console.log(error);
+	    } catch(err) {
+	    	console.log(err);
 	    }
 
 	    // Check if is an `object`.
@@ -167,7 +164,6 @@ var ngModule = angular.module('oauth2', [
 
 		        return $http.post(config.baseUrl + config.grantPath, data, options).then(function(response) {
 		          OAuthToken.setToken(response.data);
-		          console.log('GETTOKEN', OAuthToken.getToken())
 
 		          return response;
 		        });
@@ -184,8 +180,6 @@ var ngModule = angular.module('oauth2', [
 
 		        data = queryString.stringify(data);
 		        var authorization = 'Basic ' + window.btoa(config.clientKey + ':' + config.clientSecret);
-		        console.log(authorization)
-		        console.log('OUw0SFk5T2Zkc2c0UTRKSWJYWV8ydWdxVnI4YTpOdEc1Y3ZERkthc0MxTnlEdEdsOWJveVJmTVlh')
 
 		        options = angular.extend({
 		          headers: {
