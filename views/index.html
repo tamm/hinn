@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <title>Hinn</title>
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
         <link rel="stylesheet" href="/static/angular/angular-material.css">
         <link rel="stylesheet" href="/static/angular/angular-material-icons.css">
@@ -60,7 +61,7 @@
                 width: 100%;
             }
             .departureBoard tr td {
-                padding: 0 5px;
+                padding: 2px 5px;
             }
             .departureBoard tr:nth-child(even) td {
                 background: #E3ECF5;
@@ -71,12 +72,14 @@
             .icon-circle {
                 border-radius: 50%;
                 padding: 8px;
-                margin: 2px 0;
+            }
+            .difference {
+                opacity: .5;
             }
         </style>
     </head>
-    <body ng-app="HinnMed" layout-fill>
-        <div ng-controller="HinnMedController" layout="column" layout-fill>
+    <body ng-app="Hinn" layout-fill>
+        <div ng-controller="HinnController" layout="column" layout-fill>
             <main layout="column" flex ng-if="!origin">
                 <md-toolbar layout="row">
                     <div class="md-toolbar-tools">
@@ -112,7 +115,7 @@
                                 <th>Riktning</th>
                                 <th colspan="4">Nästa avgång</th>
                             </tr>
-                            <tr ng-repeat="departureBoardLine in departureBoardLines">
+                            <tr ng-repeat="departureBoardLine in departureBoardLines" ng-click="selectDeparture(departureBoardLine)">
                                 <td align="center" ng-if="departureBoardLine.departures[0].icon">
                                     <ng-md-icon ng-style="departureBoardLine.departures[0].style" class="icon-circle" icon="{{ departureBoardLine.departures[0].icon }}"></ng-md-icon>
                                 </td>
@@ -131,11 +134,60 @@
                                     <small>{{ departureBoardLine.departures[0].directionLine2 }}</small>
                                 </td>
                                 <td align="center" ng-repeat="departure in departureBoardLine.departures">
-                                    <span ng-if="departure.empty !== true">                                    
-                                        <span ng-if="departureBoardLine.departures.length > 1 || departure.minutesUntil <= 60">{{ departure.minutesUntil }} </span>
-                                        <span ng-if="departureBoardLine.departures.length === 1 && departure.minutesUntil > 60" am-time-ago="departure.rtFull"></span>
-                                        <i ng-if="departure.difference !== 0"> ({{ departure.difference }})</i>
-                                    </span>
+                                    <minutes-until></minutes-until>
+                                </td>
+                            </tr>
+                        </table>
+                    </md-list> 
+
+                </md-content>
+            </main>
+
+            <main layout="column" flex ng-if="departure">
+                <md-toolbar layout="row">
+                    <div class="md-toolbar-tools">
+                        <md-button class="md-icon-button" aria-label="back" ng-click="removeDeparture()">
+                            <ng-md-icon icon="arrow_back"></ng-md-icon>
+                        </md-button>  
+                        <h3 flex>
+                            <span ng-if="departure.icon">
+                                <ng-md-icon icon="{{ departure.icon }}"></ng-md-icon>
+                            </span>
+                            {{ departure.name }} {{ departure.direction }}
+                        </h3>
+                    </div>
+                </md-toolbar>
+                <md-content flex>
+
+                    <md-list ng-cloak>
+                        <table class="departureBoard">
+                            <tr>
+                                <th>Linje</th>
+                                <th>Plats</th>
+                                <th>Riktning</th>
+                                <th colspan="4">Nästa avgång</th>
+                            </tr>
+                            <tr>
+                                <td align="center" ng-if="departure.icon">
+                                    <ng-md-icon ng-style="departure.style" class="icon-circle" icon="{{ departure.icon }}"></ng-md-icon>
+                                </td>
+                                <td align="center" ng-if="!departure.icon">
+                                    <div class="md-button no-min-width" ng-style="departure.style">
+                                        <span>{{ departure.sname }}</span>
+                                    </div>
+                                </td>
+                                <td align="center">{{ departure.track }}</td>
+                                
+                                <td ng-if="!departure.directionLine2" flex>
+                                    {{ departure.directionLine1 }}
+                                </td>
+                                <td ng-if="departure.directionLine2" flex>
+                                    <div>{{ departure.directionLine1 }}</div>
+                                    <small>{{ departure.directionLine2 }}</small>
+                                </td>
+                                <td align="center">
+                                    <span am-time-ago="departure.rt"></span>
+                                    <!-- <minutes-until></minutes-until> -->
                                 </td>
                             </tr>
                         </table>
@@ -169,7 +221,7 @@
         <script src="/static/angular/angular-cookies.min.js"></script>
         <script src="/static/angular/query-string.js"></script>
 
-        <script src="/static/oauth2.js"></script>
-        <script src="/static/app.js"></script>
+        <script src="/static/oauth2.js?v=1"></script>
+        <script src="/static/app.js?v=1"></script>
     </body>
 </html>

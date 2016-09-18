@@ -1,14 +1,14 @@
 {
-  "name": "hinn-med",
+  "name": "hinn",
   "version": "0.1.0",
-  "description": "Hinn Med is a local public transport app for Göteborg",
+  "description": "Hinn is a local public transport app for Göteborg",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tamm/hinn-med.git"
+    "url": "git+https://github.com/tamm/hinn.git"
   },
   "keywords": [
     "public",
@@ -17,9 +17,9 @@
   "author": "Tamm",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tamm/hinn-med/issues"
+    "url": "https://github.com/tamm/hinn/issues"
   },
-  "homepage": "https://github.com/tamm/hinn-med#readme",
+  "homepage": "https://github.com/tamm/hinn#readme",
   "dependencies": {
     "angular": "^1.5.8",
     "angular-animate": "^1.5.8",

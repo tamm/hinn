@@ -32,6 +32,7 @@ var ngModule = angular.module('oauth2', [
 	      return config;
 	    },
 	    responseError: function(rejection) {
+	    	console.log('oauth2 responseError ',rejection);
 	      // Catch `invalid_request` and `invalid_grant` errors and ensure that the `token` is removed.
 	      if (400 === rejection.status && rejection.data &&
 	        ('invalid_request' === rejection.data.error || 'invalid_grant' === rejection.data.error)
@@ -49,6 +50,13 @@ var ngModule = angular.module('oauth2', [
 	      ) {
 	        $rootScope.$emit('oauth:error', rejection);
 	      }
+
+	      // Special case for Vasttrafik API rejections
+          if (-1 === rejection.status &&
+          	rejection.config.grant_type === 'client_credentials') {
+          	// refresh token if client credentials
+	        $rootScope.$emit('oauth:error', 'invalid_token');
+          }
 
 	      return $q.reject(rejection);
 	    }
@@ -109,7 +117,7 @@ var ngModule = angular.module('oauth2', [
 	   * OAuth service.
 	   */
 
-	  this.$get = ['$http', 'OAuthToken', function($http, OAuthToken) {
+	  this.$get = ['$q', '$http', 'OAuthToken', function($q, $http, OAuthToken) {
 	    var OAuth = {};
 
 	      /**
@@ -168,8 +176,21 @@ var ngModule = angular.module('oauth2', [
 		          return response;
 		        });
       		} else if (config.clientKey && config.clientSecret) {
+
+      			// check if we have a valid token already, or need a new one
+      			if (OAuthToken.isTokenValid()) {
+      				console.log('already have valid token');
+      				return $q(function(resolve, reject){
+      					var token = OAuthToken.getToken();
+      					if (token) {
+      						resolve(token);
+      					} else {
+      						reject('no token found');
+      					}
+      				});
+      			}
+
 		        data = angular.extend({
-		          // client_id: config.clientId,
 		          grant_type: 'client_credentials',
 		          scope: 'test1'
 		        }, data);
@@ -182,6 +203,7 @@ var ngModule = angular.module('oauth2', [
 		        var authorization = 'Basic ' + window.btoa(config.clientKey + ':' + config.clientSecret);
 
 		        options = angular.extend({
+		          grant_type: 'client_credentials',
 		          headers: {
 		            'Authorization': authorization,
 		            'Content-Type': 'application/x-www-form-urlencoded'
@@ -191,7 +213,7 @@ var ngModule = angular.module('oauth2', [
 		        return $http.post(config.baseUrl + config.grantPath, data, options).then(function(response) {
 		          OAuthToken.setToken(response.data);
 
-		          return response;
+		          return response.data;
 		        });      		}
 	      };
 
@@ -309,6 +331,8 @@ var ngModule = angular.module('oauth2', [
 	       */
 
 	      OAuthToken.setToken = function(data) {
+	      	data.savedAt = new Date().getTime();
+	      	data.expiresAt = data.savedAt + (data.expires_in * 1000);
 	        return $cookies.putObject(config.name, data, config.options);
 	      };
 
@@ -321,12 +345,26 @@ var ngModule = angular.module('oauth2', [
 	      }
 
 	      /**
+	       * Get token.
+	       */
+
+	      OAuthToken.isTokenValid = function() {
+	      	var token = this.getToken(),
+	      		isValid = false;
+	      	if (token && token.savedAt + (token.expires_in * 1000) > new Date().getTime()) {
+	      		isValid = true;
+	      	}
+	        return isValid;
+	      };
+
+	      /**
 	       * Get accessToken.
 	       */
 
 	      OAuthToken.getAccessToken = function() {
-	        return this.getToken() ? this.getToken().access_token : undefined;
-	      }
+	      	var token = this.getToken();
+	        return token ? token.access_token : undefined;
+	      };
 
 	      /**
 	       * Get authorizationHeader.
