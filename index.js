@@ -4,13 +4,17 @@ var fs = require('fs');
 var express = require('express');
 var app = express();
 var router = express.Router();
-var routes = require('./routes');
+// var routes = require('./routes');
 var https = require('https');
 
-app.use('/static', express.static(__base + 'public'));
-app.set('view engine', 'pug');
+app.get('*', function(req, res, next){
+	console.log('GET: ' + req.url);
+	next();
+});
+app.use('/', express.static(__base + 'public'));
+// app.set('view engine', 'pug');
 
-app.use('/', routes);
+// app.use('/', routes);
 
 try {
 	var privateKey = fs.readFileSync( '/ssl/privatekey.pem' );

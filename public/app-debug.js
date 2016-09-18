@@ -27,13 +27,17 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 	      // return $window.location.href = '/login?error_reason=' + rejection.data.error;
 	    });
 	}])
-	.controller('HinnController', ['$scope', '$http', 'OAuth', 'OAuthToken', '$mdDialog', '$interval', '$timeout', function($scope, $http, OAuth, OAuthToken, $mdDialog, $interval, $timeout) {
+	.controller('HinnController', ['$rootScope', '$scope', '$http', 'OAuth', 'OAuthToken', '$mdDialog', '$interval', '$timeout', function($rootScope, $scope, $http, OAuth, OAuthToken, $mdDialog, $interval, $timeout) {
 		var vasttrafikApiUrl = 'https://api.vasttrafik.se/bin/rest.exe/v2';
 
 		var isAuthenticated =  OAuth.isAuthenticated();
 		var maxDeparturesPerLine = 2;
 		var getDeparturesInterval;
-        
+
+		var storageKeys = {};
+		storageKeys.recentDestinations = 'hinn.recentDestinations';
+		$scope.recentDestinations = JSON.parse(sessionStorage.getItem(storageKeys.recentDestinations)) || [];
+
         var findWithAttr = function (array, attr1, value) {
             for (var i = 0; i < array.length; i += 1) {
                 if (array[i][attr1]) {
@@ -60,6 +64,24 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 				});
 
 				$scope.nearbystops = stops;
+			}
+		});
+
+		$scope.$watch('trips', function (trips) {
+			if (trips) {
+				var legs = [];
+
+				trips.forEach(function(trip) {
+					if (!Array.isArray(trip.Leg)) {
+						trip.Leg = [trip.Leg];
+					}
+
+					legs = legs.concat(trip.Leg);
+				});
+
+				$scope.legs = legs;
+
+				evaluateDepartureBoard($scope.departureBoard);
 			}
 		});
 
@@ -134,12 +156,25 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		      targetEvent: ev,
 		      clickOutsideToClose:true,
 		      fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
-		    })
+		    });
+		};
+
+		$scope.openSelectDestination = function(ev) {
+			console.log('openSelectDestination');
+
+			$mdDialog.show({
+		      controller: 'HinnController',
+		      templateUrl: 'selectDestination.html',
+		      parent: angular.element(document.body),
+		      targetEvent: ev,
+		      clickOutsideToClose:true,
+		      fullscreen: true // Only for -xs, -sm breakpoints.
+		    });
 		};
 
 		$scope.selectOrigin = function (stop) {
 			console.log('selectOrigin', stop);
-			$scope.origin = stop;
+			$rootScope.origin = stop;
 			getDepartures();
 			getDeparturesInterval = $interval(getDepartures, 60 * 1000);
 			$scope.loading = true;
@@ -147,7 +182,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 
 		$scope.removeOrigin = function () {
 			console.log('removeOrigin');
-			$scope.origin = false;
+			$rootScope.origin = false;
 			$scope.departureBoard = false;
 			$interval.cancel(getDeparturesInterval);
 		};
@@ -162,10 +197,47 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			$scope.departure = false;
 		};
 
-		$scope.$watch('departureBoard', function (departureBoard) {
+		$scope.searchLocations = function (stop) {
+			$scope.loading = true;
+			searchLocations();
+		};
+
+		$scope.closeDialog = function () {
+			$mdDialog.hide();
+		};
+
+		$scope.selectDestination = function (stop) {
+			console.log('selectDestination', stop);
+			$rootScope.destination = stop;
+			$mdDialog.hide();
+			getDepartures();
+			$scope.loading = true;
+			$scope.recentDestinations = JSON.parse(sessionStorage.getItem(storageKeys.recentDestinations)) || [];
+			$scope.recentDestinations.forEach(function(location, index) {
+				if (location.id === stop.id) {
+					$scope.recentDestinations.splice(index, 1);
+				}
+			});
+			$scope.recentDestinations.push($rootScope.destination);
+			console.log($scope.recentDestinations);
+			sessionStorage.setItem(storageKeys.recentDestinations, JSON.stringify($scope.recentDestinations));
+		};
+
+		$scope.removeDestination = function () {
+			console.log('removeDestination');
+			$rootScope.destination = false;
+			getDepartures();
+			$scope.loading = true;
+		};
+
+		var evaluateDepartureBoard = function (departureBoard) {
 			if (departureBoard !== undefined && departureBoard.hasOwnProperty('Departure')) {
 				var departureBoardLines = [];
 				var now = new Date();
+
+				if (!Array.isArray(departureBoard.Departure)) {
+					departureBoard.Departure = [departureBoard.Departure];
+				}
 
 				departureBoard.Departure.forEach(function(departure) {
 					departure.style = {background: departure.fgColor};
@@ -208,7 +280,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 						departure.directionLine2 = departure.direction.replace(direction[0],'').trim();
 					}
 
-					var id = departure.sname + departure.track + departure.direction;
+					var id = departure.sname + departure.direction;
 
 					var departureBoardIndex = findWithAttr(departureBoardLines, 'id', id);
 					if (departureBoardIndex > -1) {
@@ -229,18 +301,37 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 							departureBoardLine.departures.push({empty: true});
 						}
 					}
+
+					departureBoardLine.inTripLegs = false;
+					if ($scope.legs) {					
+						$scope.legs.forEach(function(leg) {
+							if (leg.type !== "WALK") {
+								var id = leg.sname + leg.direction;
+								if (id === departureBoardLine.id) {
+									console.log('match');
+									departureBoardLine.inTripLegs = true;
+								}
+							}
+						});
+					}
 				});
 				
+				console.log('departureBoardLines', departureBoardLines);
+
 				$scope.departureBoardLines = departureBoardLines;
 			} else {
+				console.log('$scope.departureBoardLines = undefined;', departureBoard);
 				$scope.departureBoardLines = undefined;
 			}
-		});
+		};
+
+		$scope.$watch('departureBoard', evaluateDepartureBoard);
 
 		var getDepartures = function() {
 			var departureBoardUrl = vasttrafikApiUrl + '/departureBoard';
+			var tripUrl = vasttrafikApiUrl + '/trip';
 			var now = new Date();
-			params = {
+			departureBoardParams = {
 				'format': 'json',
 				'useVas': 1, // Vasttågen
 				'useLDTrain': 1, // Long Distance Trains
@@ -248,24 +339,69 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 				'useBus': 1,
 				'useBoat': 1,
 				'useTram': 1,
-				id: $scope.origin.id,
+				id: $rootScope.origin.id,
 				date: now.toLocaleDateString('sv-SE').slice(0,10),
 				time: now.getHours() + ':' + now.getMinutes(),
 				maxDeparturesPerLine: maxDeparturesPerLine,
-				timeSpan: 70
+				timeSpan: 370
 			};
-			console.log(params)
-			if ($scope.destination) {
-				params.direction = $scope.destination.id;
-			}
 			$http.get(departureBoardUrl, {
-				params: params
+				params: departureBoardParams
 			}).then(function(response)
 				{
 					if (response && response.data && response.data.DepartureBoard) {
+						response.data.DepartureBoard.localVersion = Math.random(6);
 						$scope.departureBoard = response.data.DepartureBoard;
 					}
 					console.log('departureBoard', response.data.DepartureBoard);
+					$scope.loading = false;
+				});
+
+			if ($rootScope.destination) {
+				tripParams = {
+					'format': 'json',
+					'useVas': 1, // Vasttågen
+					'useLDTrain': 1, // Long Distance Trains
+					'useRegTrain': 1, // Regional Trains
+					'useBus': 1,
+					'useBoat': 1,
+					'useTram': 1,
+					originId: $rootScope.origin.id,
+					date: now.toLocaleDateString('sv-SE').slice(0,10),
+					time: now.getHours() + ':' + now.getMinutes(),
+					// maxDeparturesPerLine: maxDeparturesPerLine,
+					// timeSpan: 70,
+					destId: $rootScope.destination.id
+				};
+				$http.get(tripUrl, {
+					params: tripParams
+				}).then(function(response)
+					{
+						if (response && response.data && response.data) {
+							$rootScope.trips = response.data.TripList.Trip;
+						}
+						console.log('trips', response.data.TripList.Trip);
+					});
+			}
+		};
+
+		var searchLocations = function() {
+			var locationSearchUrl = vasttrafikApiUrl + '/location.name';
+			var now = new Date();
+			params = {
+				'format': 'json',
+				'input': $scope.searchQuery
+			};
+			$http.get(locationSearchUrl, {
+				params: params
+			}).then(function(response)
+				{
+					if (response && response.data) {
+						$scope.locations = response.data;
+					}
+
+					console.log('location.name', response.data);
+					console.log($scope.locations);
 					$scope.loading = false;
 				});
 		};

@@ -11,7 +11,7 @@ gulp.task('build', ['compress', 'compress-angular']);
 
 gulp.task('watch', function () {
     // Endless stream mode 
-    return watch(['lib/*.js', 'modules/**/index.js'], function (events, done) {
+    return watch(['lib/*.js', 'modules/**/index.js', 'views/*.html'], function (events, done) {
       gulp.start('compress');
     });
 });
@@ -54,7 +54,12 @@ gulp.task('compress', function() {
         }
     }))
     .pipe(gulp.dest('public'));
-});
+  gulp.src([
+  'views/*.html'
+  ])
+    .pipe(plumber())
+    .pipe(minify())
+    .pipe(gulp.dest('public'));});
 
 gulp.task('compress-angular', function() {
 // angular
