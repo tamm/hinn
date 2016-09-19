@@ -9,7 +9,6 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		});
 	}])
 	.run(['$rootScope', '$window', 'OAuth', function($rootScope, $window, OAuth) {
-		console.log('set up error handling')
 	    $rootScope.$on('oauth:error', function(event, rejection) {
 	    	console.log('caught an error', rejection)
 	      // Ignore `invalid_grant` error - should be catched on `LoginController`.
@@ -35,8 +34,8 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		var getDeparturesInterval;
 
 		var storageKeys = {};
-		storageKeys.recentDestinations = 'hinn.recentDestinations';
-		$scope.recentDestinations = JSON.parse(sessionStorage.getItem(storageKeys.recentDestinations)) || [];
+		storageKeys.recentLocations = 'hinn.recentLocations';
+		$scope.recentLocations = JSON.parse(sessionStorage.getItem(storageKeys.recentLocations)) || [];
 
         var findWithAttr = function (array, attr1, value) {
             for (var i = 0; i < array.length; i += 1) {
@@ -125,7 +124,14 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			refreshTime = ((token.expiresAt - new Date().getTime())) - 100;
 
 			$timeout(handleToken, refreshTime);
+		});
 
+		$scope.people = [
+			{name:'tamm'},
+			{name:'tamm2'}
+		];
+
+		var getSystemInfo = function () {
 			var systemInfoUrl = vasttrafikApiUrl + '/systeminfo';
 			params = {
 				'format': 'json',
@@ -139,15 +145,10 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					}
 					console.log('systemInfo',response.data.SystemInfo);
 				});
-		});
-
-		$scope.people = [
-			{name:'tamm'},
-			{name:'tamm2'}
-		];
-
+		};
 		$scope.showInfo = function(ev) {
 			console.log('showInfo');
+			getSystemInfo();
 
 			$mdDialog.show({
 		      controller: 'HinnController',
@@ -172,12 +173,27 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		    });
 		};
 
+		$scope.openSelectOrigin = function(ev) {
+			console.log('openSelectOrigin');
+
+			$mdDialog.show({
+		      controller: 'HinnController',
+		      templateUrl: 'selectOrigin.html',
+		      parent: angular.element(document.body),
+		      targetEvent: ev,
+		      clickOutsideToClose:true,
+		      fullscreen: true // Only for -xs, -sm breakpoints.
+		    });
+		};
+
 		$scope.selectOrigin = function (stop) {
-			console.log('selectOrigin', stop);
+			console.log('selectOrigin');
 			$rootScope.origin = stop;
 			getDepartures();
 			getDeparturesInterval = $interval(getDepartures, 60 * 1000);
 			$scope.loading = true;
+			saveRecentLocation(stop);
+			$mdDialog.hide();
 		};
 
 		$scope.removeOrigin = function () {
@@ -188,7 +204,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		};
 
 		$scope.selectDeparture = function (departureBoardLine) {
-			console.log('selectDeparture', departureBoardLine.departures[0]);
+			console.log('selectDeparture');
 			$scope.departure = departureBoardLine.departures[0];
 		};
 
@@ -206,21 +222,30 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			$mdDialog.hide();
 		};
 
+		var saveRecentLocation = function (stop) {
+			console.log('saveRecentLocation');
+			$scope.recentLocations = JSON.parse(sessionStorage.getItem(storageKeys.recentLocations)) || [];
+			
+			$scope.recentLocations.forEach(function(location, index) {
+				if (location && location.id === stop.id) {
+					$scope.recentLocations.splice(index, 1);
+				}
+			});
+			
+			$scope.recentLocations.unshift(stop);
+
+			$scope.recentLocations = $scope.recentLocations.slice(0,5);
+
+			sessionStorage.setItem(storageKeys.recentLocations, JSON.stringify($scope.recentLocations));
+		};
+
 		$scope.selectDestination = function (stop) {
 			console.log('selectDestination', stop);
 			$rootScope.destination = stop;
 			$mdDialog.hide();
 			getDepartures();
 			$scope.loading = true;
-			$scope.recentDestinations = JSON.parse(sessionStorage.getItem(storageKeys.recentDestinations)) || [];
-			$scope.recentDestinations.forEach(function(location, index) {
-				if (location.id === stop.id) {
-					$scope.recentDestinations.splice(index, 1);
-				}
-			});
-			$scope.recentDestinations.push($rootScope.destination);
-			console.log($scope.recentDestinations);
-			sessionStorage.setItem(storageKeys.recentDestinations, JSON.stringify($scope.recentDestinations));
+			saveRecentLocation(stop);
 		};
 
 		$scope.removeDestination = function () {
@@ -231,6 +256,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		};
 
 		var evaluateDepartureBoard = function (departureBoard) {
+			console.log('evaluateDepartureBoard');
 			if (departureBoard !== undefined && departureBoard.hasOwnProperty('Departure')) {
 				var departureBoardLines = [];
 				var now = new Date();
@@ -242,11 +268,11 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 				departureBoard.Departure.forEach(function(departure) {
 					departure.style = {background: departure.fgColor};
 					switch(departure.type){
-						case "BUS":
-							if (isNaN(departure.sname)) {
-								departure.icon = 'directions_bus';
-							}
-							break;
+						// case "BUS":
+							// if (isNaN(departure.sname)) {
+							// 	departure.icon = 'directions_bus';
+							// }
+							// break;
 						case "VAS":
 							departure.icon = 'directions_subway';
 							break;
@@ -256,12 +282,9 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 						case "REGTRAIN":
 							departure.icon = 'train';
 							break;
-						case "BOAT":
-							departure.icon = 'directions_ferry';
-							break;
-						case "TRAM":
-							departure.icon = 'tram';
-							break;
+						// case "BOAT":
+						// 	departure.icon = 'directions_ferry';
+						// 	break;
 						default:
 							departure.icon = false;
 					}
@@ -316,11 +339,10 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					}
 				});
 				
-				console.log('departureBoardLines', departureBoardLines);
+				// console.log('departureBoardLines', departureBoardLines);
 
 				$scope.departureBoardLines = departureBoardLines;
 			} else {
-				console.log('$scope.departureBoardLines = undefined;', departureBoard);
 				$scope.departureBoardLines = undefined;
 			}
 		};
@@ -352,8 +374,9 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					if (response && response.data && response.data.DepartureBoard) {
 						response.data.DepartureBoard.localVersion = Math.random(6);
 						$scope.departureBoard = response.data.DepartureBoard;
+						evaluateDepartureBoard($scope.departureBoard);
 					}
-					console.log('departureBoard', response.data.DepartureBoard);
+
 					$scope.loading = false;
 				});
 
@@ -409,7 +432,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 	.directive("minutesUntil", ['$interval', function($interval){
 	    return {
 	        restrict: "E",
-	        link: function(scope,element,attr){
+	        link: function(scope, element, attr){
 	        	var departure = scope.departure;
 				var minutesUntil;
 				
@@ -417,7 +440,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					var now = new Date();
 					departure.minutesUntil = Math.round((departure.rt.getTime() - now.getTime()) / 60 / 1000);
 
-					var displayString = departure.minutesUntil;
+					var displayString = departure.minutesUntil < 60 ? departure.minutesUntil : (Math.round(departure.minutesUntil / 60) + 'h');
 
 					departure.difference = (departure.rt.getTime() - departure.st.getTime()) / 60 / 1000;
 
@@ -427,6 +450,10 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 
 					if (departure.minutesUntil < 1) {
 						displayString = "Nu";
+					}
+
+					if (departure.minutesUntil < 0) {
+						displayString = "Över";
 					}
 
 					element.html(displayString);

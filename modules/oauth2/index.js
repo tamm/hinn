@@ -179,7 +179,6 @@ var ngModule = angular.module('oauth2', [
 
       			// check if we have a valid token already, or need a new one
       			if (OAuthToken.isTokenValid()) {
-      				console.log('already have valid token');
       				return $q(function(resolve, reject){
       					var token = OAuthToken.getToken();
       					if (token) {

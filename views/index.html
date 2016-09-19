@@ -84,15 +84,33 @@
                 <md-toolbar layout="row">
                     <div class="md-toolbar-tools">
                         <h3 flex>Traveling from</h3>
+                        <md-button class="md-icon-button" aria-label="back" ng-click="openSelectOrigin()">
+                            <ng-md-icon icon="search"></ng-md-icon>
+                        </md-button>  
                     </div>
                 </md-toolbar>
                 <md-content flex>
                     <md-list ng-cloak>
                         <md-list-item ng-repeat="stop in nearbystops" class="noright" ng-click="selectOrigin(stop)">
                             <ng-md-icon icon="location_on" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
-                            <p>{{ stop.name }}, {{ stop.track }}</p>
+                            <p>{{ stop.name }}</p>
                         </md-list-item>
-                    </md-list>   
+                    </md-list>
+
+                    <div ng-if="recentLocations">
+    
+                        <h5 layout-padding>Recent Destinations</h5>
+
+                        <md-list>
+                            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations track by $index">
+                                <ng-md-icon icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
+                                <p>{{location.name}}</p>
+                            </md-list-item>
+                        </md-list>
+
+                        <md-divider></md-divider>
+
+                    </div>
                 </md-content>
             </main>
 
@@ -136,7 +154,7 @@
                                     <div>{{ departureBoardLine.departures[0].directionLine1 }}</div>
                                     <small>{{ departureBoardLine.departures[0].directionLine2 }}</small>
                                 </td>
-                                <td align="center" ng-repeat="departure in departureBoardLine.departures">
+                                <td align="center" ng-repeat="departure in departureBoardLine.departures | limitTo: 2">
                                     <minutes-until></minutes-until>
                                 </td>
                             </tr>
@@ -239,7 +257,7 @@
         <script src="/angular/angular-cookies.min.js"></script>
         <script src="/angular/query-string.js"></script>
 
-        <script src="/oauth2.js?v=1"></script>
-        <script src="/app.js?v=1"></script>
+        <script src="/oauth2.js?v=2"></script>
+        <script src="/app.js?v=2"></script>
     </body>
 </html>
