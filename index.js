@@ -16,6 +16,10 @@ app.use('/', express.static(__base + 'public'));
 
 // app.use('/', routes);
 
+router.get('/DD1765F8594A8FE76CD0DA42C4CA8401.txt', function (req, res) {
+  res.sendFile(__base + 'DD1765F8594A8FE76CD0DA42C4CA8401.txt');
+});
+
 try {
 	var privateKey = fs.readFileSync( '/ssl/privatekey.pem' );
 } catch (error) {
