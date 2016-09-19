@@ -48,7 +48,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
             return -1;
         };
 
-		$scope.loading = true;
+		$rootScope.loading = true;
 
 		$scope.title = 'Hinn';
 
@@ -104,7 +104,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			}).then(function(response) {
 				$scope.NearbyStops = response.data;
 				console.log('nearbystops',$scope.NearbyStops);
-				$scope.loading = false;
+				$rootScope.loading = false;
 			});
 		};
 
@@ -164,12 +164,12 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			console.log('openSelectDestination');
 
 			$mdDialog.show({
-		      controller: 'HinnController',
-		      templateUrl: 'selectDestination.html',
-		      parent: angular.element(document.body),
-		      targetEvent: ev,
-		      clickOutsideToClose:true,
-		      fullscreen: true // Only for -xs, -sm breakpoints.
+				controller: 'HinnController',
+				templateUrl: 'selectDestination.html',
+				parent: angular.element(document.body),
+				targetEvent: ev,
+				clickOutsideToClose:true,
+				fullscreen: true // Only for -xs, -sm breakpoints.
 		    });
 		};
 
@@ -177,12 +177,12 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			console.log('openSelectOrigin');
 
 			$mdDialog.show({
-		      controller: 'HinnController',
-		      templateUrl: 'selectOrigin.html',
-		      parent: angular.element(document.body),
-		      targetEvent: ev,
-		      clickOutsideToClose:true,
-		      fullscreen: true // Only for -xs, -sm breakpoints.
+				controller: 'HinnController',
+				templateUrl: 'selectOrigin.html',
+				parent: angular.element(document.body),
+				targetEvent: ev,
+				clickOutsideToClose:true,
+				fullscreen: true // Only for -xs, -sm breakpoints.
 		    });
 		};
 
@@ -191,7 +191,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			$rootScope.origin = stop;
 			getDepartures();
 			getDeparturesInterval = $interval(getDepartures, 60 * 1000);
-			$scope.loading = true;
+			$rootScope.loading = true;
 			saveRecentLocation(stop);
 			$mdDialog.hide();
 		};
@@ -214,7 +214,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 		};
 
 		$scope.searchLocations = function (stop) {
-			$scope.loading = true;
+			$rootScope.loading = true;
 			searchLocations();
 		};
 
@@ -244,7 +244,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			$rootScope.destination = stop;
 			$mdDialog.hide();
 			getDepartures();
-			$scope.loading = true;
+			$rootScope.loading = true;
 			saveRecentLocation(stop);
 		};
 
@@ -252,7 +252,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			console.log('removeDestination');
 			$rootScope.destination = false;
 			getDepartures();
-			$scope.loading = true;
+			$rootScope.loading = true;
 		};
 
 		var evaluateDepartureBoard = function (departureBoard) {
@@ -339,11 +339,11 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					}
 				});
 				
-				// console.log('departureBoardLines', departureBoardLines);
+				console.log('departureBoardLines', departureBoardLines);
 
-				$scope.departureBoardLines = departureBoardLines;
+				$rootScope.departureBoardLines = departureBoardLines;
 			} else {
-				$scope.departureBoardLines = undefined;
+				$rootScope.departureBoardLines = undefined;
 			}
 		};
 
@@ -377,7 +377,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 						evaluateDepartureBoard($scope.departureBoard);
 					}
 
-					$scope.loading = false;
+					$rootScope.loading = false;
 				});
 
 			if ($rootScope.destination) {
@@ -425,7 +425,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 
 					console.log('location.name', response.data);
 					console.log($scope.locations);
-					$scope.loading = false;
+					$rootScope.loading = false;
 				});
 		};
 	}])
@@ -453,7 +453,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					}
 
 					if (departure.minutesUntil < 0) {
-						displayString = "Över";
+						displayString = "Åkt";
 					}
 
 					element.html(displayString);
