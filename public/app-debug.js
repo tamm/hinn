@@ -31,7 +31,6 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 
 		var isAuthenticated =  OAuth.isAuthenticated();
 		var maxDeparturesPerLine = 2;
-		var getDeparturesInterval;
 
 		var storageKeys = {};
 		storageKeys.recentLocations = 'hinn.recentLocations';
@@ -190,7 +189,8 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			console.log('selectOrigin');
 			$rootScope.origin = stop;
 			getDepartures();
-			getDeparturesInterval = $interval(getDepartures, 60 * 1000);
+			$interval.cancel($rootScope.getDeparturesInterval);
+			$rootScope.getDeparturesInterval = $interval(getDepartures, 60 * 1000);
 			$rootScope.loading = true;
 			saveRecentLocation(stop);
 			$mdDialog.hide();
@@ -200,7 +200,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			console.log('removeOrigin');
 			$rootScope.origin = false;
 			$scope.departureBoard = false;
-			$interval.cancel(getDeparturesInterval);
+			$interval.cancel($rootScope.getDeparturesInterval);
 		};
 
 		$scope.selectDeparture = function (departureBoardLine) {
@@ -339,7 +339,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					}
 				});
 				
-				console.log('departureBoardLines', departureBoardLines);
+				// console.log('departureBoardLines', departureBoardLines);
 
 				$rootScope.departureBoardLines = departureBoardLines;
 			} else {
@@ -374,7 +374,6 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					if (response && response.data && response.data.DepartureBoard) {
 						response.data.DepartureBoard.localVersion = Math.random(6);
 						$scope.departureBoard = response.data.DepartureBoard;
-						evaluateDepartureBoard($scope.departureBoard);
 					}
 
 					$rootScope.loading = false;
