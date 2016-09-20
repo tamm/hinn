@@ -8,7 +8,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 			grantPath: '/token',
 		});
 	}])
-	.run(['$rootScope', '$window', 'OAuth', function($rootScope, $window, OAuth) {
+	.run(['$rootScope', '$window', 'OAuth', '$mdToast', function($rootScope, $window, OAuth, $mdToast) {
 	    $rootScope.$on('oauth:error', function(event, rejection) {
 	    	console.log('caught an error', rejection)
 	      // Ignore `invalid_grant` error - should be catched on `LoginController`.
@@ -19,7 +19,17 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 	      // Refresh token when a `invalid_token` error occurs.
 	      if ('invalid_token' === rejection.data.error) {
 	      	console.log('invalid_token');
-	        return OAuth.getRefreshToken();
+			$rootScope.token = OAuth.getAccessToken();
+			$rootScope.loading = false;
+
+		    $mdToast.show(
+		      $mdToast.simple()
+		        .textContent('Please try that again.')
+		        .position({bottom:true})
+		        .hideDelay(3000)
+		    );
+
+	        return $rootScope.token;
 	      }
 
 	      // Redirect to `/login` with the `error_reason`.
@@ -109,17 +119,17 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 
 		var handleToken = function () {
 			console.log('handleToken');
-			$scope.token = OAuth.getAccessToken();
-			$scope.token.then(function(token){
+			$rootScope.token = OAuth.getAccessToken();
+			$rootScope.token.then(function(token){
 				refreshTime = ((token.expiresAt - new Date().getTime())) - 100;
 
 				$timeout(handleToken, refreshTime);
 			});
 		};
 
-		$scope.token = OAuth.getAccessToken();
+		$rootScope.token = OAuth.getAccessToken();
 
-		$scope.token.then(function(token){
+		$rootScope.token.then(function(token){
 			refreshTime = ((token.expiresAt - new Date().getTime())) - 100;
 
 			$timeout(handleToken, refreshTime);
@@ -266,7 +276,10 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 				}
 
 				departureBoard.Departure.forEach(function(departure) {
-					departure.style = {background: departure.fgColor};
+					departure.style = {
+						background: departure.fgColor,
+						color: departure.bgColor
+					};
 					switch(departure.type){
 						// case "BUS":
 							// if (isNaN(departure.sname)) {
@@ -375,7 +388,7 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 						response.data.DepartureBoard.localVersion = Math.random(6);
 						$scope.departureBoard = response.data.DepartureBoard;
 					}
-
+					console.log($scope.departureBoard);
 					$rootScope.loading = false;
 				});
 

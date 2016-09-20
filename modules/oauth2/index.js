@@ -52,10 +52,12 @@ var ngModule = angular.module('oauth2', [
 	      }
 
 	      // Special case for Vasttrafik API rejections
-          if (-1 === rejection.status &&
-          	rejection.config.grant_type === 'client_credentials') {
+          if (-1 === rejection.status
+          	// && rejection.config.grant_type === 'client_credentials'
+          	) {
           	// refresh token if client credentials
-	        $rootScope.$emit('oauth:error', 'invalid_token');
+          	rejection.data = {error:'invalid_token'}
+	        $rootScope.$emit('oauth:error', rejection);
           }
 
 	      return $q.reject(rejection);
