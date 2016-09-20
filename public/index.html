@@ -186,10 +186,10 @@
                             <ng-md-icon icon="arrow_back"></ng-md-icon>
                         </md-button>  
                         <h3 flex>
-                            <span ng-if="departure.icon">
-                                <ng-md-icon icon="{{ departure.icon }}"></ng-md-icon>
+                            <span ng-if="departure.departures[0].icon">
+                                <ng-md-icon icon="{{ departure.departures[0].icon }}"></ng-md-icon>
                             </span>
-                            {{ departure.name }} {{ departure.direction }}
+                            {{ departure.departures[0].name }} {{ departure.departures[0].direction }}
                         </h3>
                     </div>
                 </md-toolbar>
@@ -201,9 +201,8 @@
                                 <th>Linje</th>
                                 <th>Plats</th>
                                 <th>Riktning</th>
-                                <th colspan="4">Nästa avgång</th>
                             </tr>
-                            <tr>
+                            <tr ng-repeat="departure in departure.departures | limitTo: 1">
                                 <td align="center" ng-if="departure.icon">
                                     <ng-md-icon ng-style="departure.style" class="icon-circle" icon="{{ departure.icon }}"></ng-md-icon>
                                 </td>
@@ -221,9 +220,10 @@
                                     <div>{{ departure.directionLine1 }}</div>
                                     <small>{{ departure.directionLine2 }}</small>
                                 </td>
-                                <td align="center">
-                                    <span am-time-ago="departure.rt"></span>
-                                    <!-- <minutes-until></minutes-until> -->
+                            </tr>
+                            <tr ng-repeat="departure in departure.departures">
+                                <td colspan="4">
+                                    <div layout-padding am-time-ago="departure.rt"></div>
                                 </td>
                             </tr>
                         </table>
