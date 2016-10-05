@@ -44,6 +44,16 @@
             .loadingVeil.revealPage {
                 display: none;
             }
+            .loadingVeil .loadingText {
+                position: absolute;
+                top: 50%;
+                left: 0;
+                margin-top: 35px;
+                height: 60px;
+                width: 100%;
+
+                text-align: center;
+            }
 
             .no-min-width {
                 min-width: 0;
@@ -137,10 +147,10 @@
                                 <th colspan="4">Nästa avgång</th>
                             </tr>
                             <tr ng-repeat="departureBoardLine in departureBoardLines" ng-click="selectDeparture(departureBoardLine)" ng-if="!destination || departureBoardLine.inTripLegs">
-                                <td align="center" ng-if="departureBoardLine.departures[0].icon">
+                                <td align="center" ng-if="departureBoardLine.departures[0].showIcon">
                                     <ng-md-icon ng-style="departureBoardLine.departures[0].style" class="icon-circle" icon="{{ departureBoardLine.departures[0].icon }}"></ng-md-icon>
                                 </td>
-                                <td align="center" ng-if="!departureBoardLine.departures[0].icon">
+                                <td align="center" ng-if="!departureBoardLine.departures[0].showIcon">
                                     <div class="md-button no-min-width" ng-style="departureBoardLine.departures[0].style">
                                         <span>{{ departureBoardLine.departures[0].sname }}</span>
                                     </div>
@@ -186,7 +196,7 @@
                             <ng-md-icon icon="arrow_back"></ng-md-icon>
                         </md-button>  
                         <h3 flex>
-                            <span ng-if="departure.departures[0].icon">
+                            <span ng-if="departure.departures[0].showIcon">
                                 <ng-md-icon icon="{{ departure.departures[0].icon }}"></ng-md-icon>
                             </span>
                             {{ departure.departures[0].name }} {{ departure.departures[0].direction }}
@@ -203,10 +213,10 @@
                                 <th>Riktning</th>
                             </tr>
                             <tr ng-repeat="departure in departure.departures | limitTo: 1">
-                                <td align="center" ng-if="departure.icon">
+                                <td align="center" ng-if="departure.showIcon">
                                     <ng-md-icon ng-style="departure.style" class="icon-circle" icon="{{ departure.icon }}"></ng-md-icon>
                                 </td>
-                                <td align="center" ng-if="!departure.icon">
+                                <td align="center" ng-if="!departure.showIcon">
                                     <div class="md-button no-min-width" ng-style="departure.style">
                                         <span>{{ departure.sname }}</span>
                                     </div>
@@ -220,10 +230,41 @@
                                     <div>{{ departure.directionLine1 }}</div>
                                     <small>{{ departure.directionLine2 }}</small>
                                 </td>
+                                <td>
+                                    <span ng-if="departure.accessibility == 'wheelChair'">
+                                        <ng-md-icon class="icon-circle" icon="accessible"></ng-md-icon>
+                                    </span>
+                                    <span align="center" ng-if="departure.icon">
+                                        <ng-md-icon ng-style="departure.style" class="icon-circle" icon="{{ departure.icon }}"></ng-md-icon>
+                                    </span>
+                                </td>
                             </tr>
-                            <tr ng-repeat="departure in departure.departures">
-                                <td colspan="4">
-                                    <div layout-padding am-time-ago="departure.rt"></div>
+                            <tr>
+                                <td layout-padding colspan="6">
+                                    <div ng-if="departure.delayAverage !== 0">
+                                        Average delay right now <span ng-bind="departure.delayAverage"></span> minutes.
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Avgår</th>                                
+                            </tr>
+                            <tr ng-repeat="departure in departure.departures" ng-if="departure.rt">
+                                <td layout-padding colspan="4">
+                                    <div>
+                                        <span am-time-ago="departure.rt"></span> <span class="difference" ng-if="departure.difference !== 0">(delay <span ng-bind="departure.difference"></span> minutes)</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr if="departure.trips.length > 0">
+                                <td layout-padding colspan="6">
+                                    <div ng-repeat="trip in departure.trips">
+                                        <b>{{trip.name}} ({{trip.duration}} minutes)</b>
+                                        <div ng-repeat="leg in trip.Leg">
+                                            <span ng-bind="leg.name"></span> mot <span ng-bind="leg.direction"></span><br>
+                                            <small>från </small><small ng-bind="leg.Origin.name"></small>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         </table>
@@ -243,7 +284,9 @@
                 </div>
             </md-toolbar>
 
-            <div class="loadingVeil" ng-class="{revealPage: !loading}"></div>
+            <div class="loadingVeil" ng-class="{revealPage: !loading}">
+                <div class="loadingText" ng-bind="loadingText"></div>
+            </div>
         </div>
 
 
