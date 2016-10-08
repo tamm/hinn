@@ -103,7 +103,7 @@
                     <md-list ng-cloak>
                         <md-list-item ng-repeat="stop in nearbystops" class="noright" ng-click="selectOrigin(stop)">
                             <ng-md-icon icon="location_on" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
-                            <p>{{ stop.name }}</p>
+                            <p>{{ stop.name }} {{ stop.chosen.length }} {{ stop.choiceDistance }}</p>
                         </md-list-item>
                     </md-list>
 
@@ -112,9 +112,9 @@
                         <h5 layout-padding>Recent Destinations</h5>
 
                         <md-list>
-                            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations track by $index">
+                            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations | limitTo: 5 track by $index">
                                 <ng-md-icon icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
-                                <p>{{location.name}}</p>
+                                <p>{{location.name}} <small>({{location.chosen.length}})</small></p>
                             </md-list-item>
                         </md-list>
 
@@ -178,6 +178,11 @@
                             </tr>
  -->
                          </table>
+
+                        <div layout-padding>
+                            <p><small>Current average delays: {{departureBoardAverageDelay}}</small></p>
+                            <p><small>Total delay in minutes for this board: {{departureBoardTotalDelay}}</small></p>
+                        </div>
 
                         <p align="center" ng-if="destination">
                             <md-button class="md-icon-button" aria-label="back" ng-click="removeDestination()">

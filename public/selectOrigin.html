@@ -19,7 +19,7 @@
         <h5 layout-padding>Recent Destinations</h5>
 
         <md-list>
-            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations">
+            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations | limitTo: 5">
                 {{location.name}} <ng-md-icon icon="favorite_border"></ng-md-icon>
             </md-list-item>
         </md-list>
