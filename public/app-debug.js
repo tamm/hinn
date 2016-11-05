@@ -1,3 +1,13 @@
+Date.prototype.stdTimezoneOffset = function() {
+    var jan = new Date(this.getFullYear(), 0, 1);
+    var jul = new Date(this.getFullYear(), 6, 1);
+    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+};
+
+Date.prototype.dst = function() {
+    return this.getTimezoneOffset() < this.stdTimezoneOffset();
+};
+
 angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 	.config(['OAuthProvider', function(OAuthProvider) {
 		OAuthProvider.configure({
@@ -413,8 +423,16 @@ angular.module('Hinn', ['ngMaterial', 'ngMdIcons', 'oauth2', 'angularMoment'])
 					departure.rtFull = departure.rtDate !== undefined ? departure.rtDate + 'T' + departure.rtTime : departure.date + 'T' + departure.time;
 					departure.rt = new Date(departure.rtFull);
 					departure.rt.setTime(departure.rt.getTime()-(1*60*60*1000));
+					if (!departure.rt.dst()) {
+						departure.rt.setTime(departure.rt.getTime()-(1*60*60*1000));
+					}
+
 					departure.st = new Date(departure.date + 'T' + departure.time);
 					departure.st.setTime(departure.st.getTime()-(1*60*60*1000));
+					if (!departure.st.dst()) {
+						departure.st.setTime(departure.st.getTime()-(1*60*60*1000));
+					}
+					
 					departure.difference = (departure.rt.getTime() - departure.st.getTime()) / 60 / 1000;
 					departure.minutesUntil = Math.round((departure.rt.getTime() - now.getTime()) / 60 / 1000);
 					departure.delayAverage = departure.difference ? departure.difference : 0;
