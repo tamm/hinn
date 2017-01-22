@@ -32,7 +32,7 @@ var findWithAttr = function (array, attr1, value) {
     return -1;
 };
 
-app.use('/views', express.static(__base + 'views'));
+app.use('/', express.static(__base + 'build'));
 app.get('/api*', function(req, res, next){
 	console.log('API: ' + req.url);
 	if (fs.existsSync(__base + apiConfig.allLocationsFile)) {
@@ -58,7 +58,6 @@ app.get('*', function(req, res, next){
 	console.log('GET: ' + req.url);
 	next();
 });
-app.use('/', express.static(__base + 'build'));
 // app.set('view engine', 'pug');
 
 // app.use('/', routes);
