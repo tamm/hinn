@@ -1,0 +1,201 @@
+
+        <div ng-controller="HinnController" layout="column" layout-fill>
+            <main layout="column" flex ng-if="!origin">
+                <md-toolbar layout="row">
+                    <div class="md-toolbar-tools">
+                        <h3 flex>Traveling from</h3>
+                        <md-button class="md-icon-button" aria-label="back" ng-click="openSelectOrigin()">
+                            <ng-md-icon icon="search"></ng-md-icon>
+                        </md-button>  
+                    </div>
+                </md-toolbar>
+                <md-content flex>
+                    <md-list ng-cloak>
+                        <md-list-item ng-repeat="stop in nearbyStops track by $index" class="noright" ng-click="selectOrigin(stop)">
+                            <ng-md-icon ng-if="!stop.chosen || stop.chosen.length < 1" icon="location_on" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
+                            <ng-md-icon ng-if="stop.chosen.length > 0" icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
+                            <p>{{ stop.name }}</p>
+                        </md-list-item>
+                    </md-list>
+
+                    <div ng-if="recentLocations">
+    
+                        <h5 layout-padding>Recent Destinations</h5>
+
+                        <md-list>
+                            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations | limitTo: 5 track by $index">
+                                <ng-md-icon icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
+                                <p>{{location.name}} <small>({{ location.choiceDistance }})</small></p>
+                            </md-list-item>
+                        </md-list>
+
+                        <md-divider></md-divider>
+
+                    </div>
+                </md-content>
+            </main>
+
+            <main layout="column" flex ng-if="origin && !departure">
+                <md-toolbar layout="row">
+                    <div class="md-toolbar-tools">
+                        <md-button class="md-icon-button" aria-label="back" ng-click="removeOrigin()">
+                            <ng-md-icon icon="flight_takeoff"></ng-md-icon>
+                        </md-button>  
+                        <h3 flex>{{ origin.name }}</h3>
+                        <md-button class="md-icon-button" aria-label="back" ng-click="openSelectDestination()">
+                            <ng-md-icon icon="flight_land"></ng-md-icon>
+                        </md-button>  
+                    </div>
+                </md-toolbar>
+                <md-content flex>
+
+                    <md-list ng-cloak>
+                        <table class="departureBoard">
+                            <tr>
+                                <th>Linje</th>
+                                <th>Plats</th>
+                                <th>Riktning</th>
+                                <th colspan="4">Nästa avgång</th>
+                            </tr>
+                            <tr ng-repeat="departureBoardLine in departureBoardLines" ng-click="selectDeparture(departureBoardLine)" ng-if="!destination || departureBoardLine.inTripLegs">
+                                <td align="center" ng-if="departureBoardLine.departures[0].showIcon">
+                                    <ng-md-icon ng-style="departureBoardLine.departures[0].style" class="icon-circle" icon="{{ departureBoardLine.departures[0].icon }}"></ng-md-icon>
+                                </td>
+                                <td align="center" ng-if="!departureBoardLine.departures[0].showIcon">
+                                    <div class="md-button no-min-width" ng-style="departureBoardLine.departures[0].style">
+                                        <span>{{ departureBoardLine.departures[0].sname }}</span>
+                                    </div>
+                                </td>
+                                <td align="center">{{ departureBoardLine.departures[0].track }}</td>
+                                
+                                <td ng-if="!departureBoardLine.departures[0].directionLine2" flex>
+                                    {{ departureBoardLine.departures[0].directionLine1 }}
+                                </td>
+                                <td ng-if="departureBoardLine.departures[0].directionLine2" flex>
+                                    <div>{{ departureBoardLine.departures[0].directionLine1 }}</div>
+                                    <small>{{ departureBoardLine.departures[0].directionLine2 }}</small>
+                                </td>
+                                <td align="center" ng-repeat="departure in departureBoardLine.departures | limitTo: 2">
+                                    <minutes-until></minutes-until>
+                                </td>
+                            </tr>
+<!--                             <tr>
+                                <th>Trips</th>
+                            </tr>
+                            <tr ng-repeat="trip in trips">
+                                <td align="center">
+                                    <span ng-repeat="leg in trip.Leg">{{ leg.name }}</span>
+                                </td>
+                            </tr>
+ -->
+                         </table>
+
+                        <div layout-padding>
+                            <p><small>Current average delays: {{departureBoardAverageDelay}}</small></p>
+                            <p><small>Total delay in minutes for this board: {{departureBoardTotalDelay}}</small></p>
+                        </div>
+
+                        <p align="center" ng-if="destination">
+                            <md-button class="md-icon-button" aria-label="back" ng-click="removeDestination()">
+                                <ng-md-icon icon="clear"></ng-md-icon>
+                            </md-button>  
+                        </p>
+                    </md-list> 
+
+                </md-content>
+            </main>
+
+            <main layout="column" flex ng-if="origin && departure">
+                <md-toolbar layout="row">
+                    <div class="md-toolbar-tools">
+                        <md-button class="md-icon-button" aria-label="back" ng-click="removeDeparture()">
+                            <ng-md-icon icon="arrow_back"></ng-md-icon>
+                        </md-button>  
+                        <h3 flex>
+                            <span ng-if="departure.departures[0].showIcon">
+                                <ng-md-icon icon="{{ departure.departures[0].icon }}"></ng-md-icon>
+                            </span>
+                            {{ departure.departures[0].name }} {{ departure.departures[0].direction }}
+                        </h3>
+                    </div>
+                </md-toolbar>
+                <md-content flex>
+
+                    <md-list ng-cloak>
+                        <table class="departureBoard">
+                            <tr>
+                                <th>Linje</th>
+                                <th>Plats</th>
+                                <th>Riktning</th>
+                            </tr>
+                            <tr ng-repeat="departure in departure.departures | limitTo: 1">
+                                <td align="center" ng-if="departure.showIcon">
+                                    <ng-md-icon ng-style="departure.style" class="icon-circle" icon="{{ departure.icon }}"></ng-md-icon>
+                                </td>
+                                <td align="center" ng-if="!departure.showIcon">
+                                    <div class="md-button no-min-width" ng-style="departure.style">
+                                        <span>{{ departure.sname }}</span>
+                                    </div>
+                                </td>
+                                <td align="center">{{ departure.track }}</td>
+                                
+                                <td ng-if="!departure.directionLine2" flex>
+                                    {{ departure.directionLine1 }}
+                                </td>
+                                <td ng-if="departure.directionLine2" flex>
+                                    <div>{{ departure.directionLine1 }}</div>
+                                    <small>{{ departure.directionLine2 }}</small>
+                                </td>
+                                <td>
+                                    <span ng-if="departure.accessibility == 'wheelChair'">
+                                        <ng-md-icon class="icon-circle" icon="accessible"></ng-md-icon>
+                                    </span>
+                                    <span align="center" ng-if="departure.icon">
+                                        <ng-md-icon ng-style="departure.style" class="icon-circle" icon="{{ departure.icon }}"></ng-md-icon>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td layout-padding colspan="6">
+                                    <div ng-if="departure.delayAverage !== 0">
+                                        Average delay right now <span ng-bind="departure.delayAverage"></span> minutes.
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Avgår</th>                                
+                            </tr>
+                            <tr ng-repeat="departure in departure.departures" ng-if="departure.rt">
+                                <td layout-padding colspan="4">
+                                    <div>
+                                        <span am-time-ago="departure.rt"></span> <span class="difference" ng-if="departure.difference !== 0">(delay <span ng-bind="departure.difference"></span> minutes)</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr if="departure.trips.length > 0">
+                                <td layout-padding colspan="6">
+                                    <div ng-repeat="trip in departure.trips">
+                                        <b>{{trip.name}} ({{trip.duration}} minutes)</b>
+                                        <div ng-repeat="leg in trip.Leg">
+                                            <span ng-bind="leg.name"></span> mot <span ng-bind="leg.direction"></span><br>
+                                            <small>från </small><small ng-bind="leg.Origin.name"></small>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </md-list> 
+
+                </md-content>
+            </main>
+
+            <md-toolbar>
+                <div class="md-toolbar-tools">
+                    <h3 flex>
+                        <span>{{title}}</span>
+                    </h3>
+                    <md-button class="md-icon-button" aria-label="More" ng-click="showInfo()">
+                        <ng-md-icon icon="info_outline"></ng-md-icon>
+                    </md-button>
+                </div>
+            </md-toolbar>

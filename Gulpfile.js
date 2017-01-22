@@ -5,7 +5,7 @@ var rename = require('gulp-rename');
 var watch = require('gulp-watch');
 var plumber = require('gulp-plumber');
 
-gulp.task('default', ['watch']);
+gulp.task('default', ['build', 'watch']);
 gulp.task('build', ['compress', 'compress-angular']);
 
 
@@ -29,7 +29,7 @@ gulp.task('compress', function() {
         exclude: ['tasks'],
         ignoreFiles: ['.combo.js', '-min.js']
     }))
-    .pipe(gulp.dest('public'));
+    .pipe(gulp.dest('build'));
   gulp.src([
   'modules/**/index.js'
   ])
@@ -53,13 +53,13 @@ gulp.task('compress', function() {
             console.log('path-new', path);
         }
     }))
-    .pipe(gulp.dest('public'));
+    .pipe(gulp.dest('build'));
   gulp.src([
   'views/*.html'
   ])
     .pipe(plumber())
     .pipe(minify())
-    .pipe(gulp.dest('public'));});
+    .pipe(gulp.dest('build'));});
 
 gulp.task('compress-angular', function() {
 // angular
@@ -72,6 +72,7 @@ gulp.task('compress-angular', function() {
     'node_modules/angular-moment/angular-moment.js',
     'node_modules/angular-material-icons/angular-material-icons.js',
     'node_modules/angular-cookies/angular-cookies.min.js',
+    'node_modules/angular-route/angular-route.js',
     'node_modules/query-string/query-string.js',
     'node_modules/angular-oauth2/dist/angular-oauth2.min.js'
   ])
@@ -83,7 +84,7 @@ gulp.task('compress-angular', function() {
         exclude: ['tasks'],
         ignoreFiles: ['.combo.js', '-min.js']
     }))
-    .pipe(gulp.dest('./public/angular'));
+    .pipe(gulp.dest('./build/angular'));
 
   gulp.src([
     'node_modules/angular-material/angular-material.css',
@@ -93,5 +94,5 @@ gulp.task('compress-angular', function() {
     .pipe(stylus({
       compress: true
     }))
-    .pipe(gulp.dest('./public/angular'));
+    .pipe(gulp.dest('./build/angular'));
 });
