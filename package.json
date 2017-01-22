@@ -34,7 +34,10 @@
     "gulp": "^3.9.1",
     "moment": "^2.14.1",
     "pug": "^2.0.0-beta5",
-    "request": "^2.79.0"
+    "request": "^2.79.0",
+    "angular-cookies": "^1.4.0",
+    "query-string": "^1.0.0"
+
   },
   "devDependencies": {
     "gulp-minify": "0.0.14",

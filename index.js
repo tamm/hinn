@@ -33,6 +33,7 @@ var findWithAttr = function (array, attr1, value) {
 };
 
 app.use('/', express.static(__base + 'build'));
+
 app.get('/api*', function(req, res, next){
 	console.log('API: ' + req.url);
 	if (fs.existsSync(__base + apiConfig.allLocationsFile)) {
