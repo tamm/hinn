@@ -8,6 +8,7 @@ var router = express.Router();
 var https = require('https');
 var request = require('request');
 var btoa = require('btoa');
+var JSONbig = require('json-bigint');
 
 
 var apiConfig = {
@@ -24,7 +25,7 @@ var apiConfig = {
 var findWithAttr = function (array, attr1, value) {
     for (var i = 0; i < array.length; i += 1) {
         if (array[i][attr1]) {
-            if (array[i][attr1] === value) {
+            if (String(array[i][attr1]) === String(value)) {
                 return i;
             }
         }
@@ -36,15 +37,14 @@ app.use('/', express.static(__base + 'build'));
 
 app.get('/api*', function(req, res, next){
 	console.log('API: ' + req.url);
-	if (fs.existsSync(__base + apiConfig.allLocationsFile)) {
-		var allLocations = JSON.parse(fs.readFileSync(__base + apiConfig.allLocationsFile));
-
+	if (allLocations) {
 		var stops = allLocations.LocationList.StopLocation;
-
 		var stop = stops[findWithAttr(stops, 'id', req.query.locationId)];
 
 		if (stop) {
   			res.send(stop);
+		} else {
+			res.send(false);
 		}
 	} else {
   		res.send({'name': 'test', 'id': req.query.locationId});
@@ -68,12 +68,16 @@ router.get('/DD1765F8594A8FE76CD0DA42C4CA8401.txt', function (req, res) {
 });
 
 try {
-	var privateKey = fs.readFileSync( '/ssl/privatekey.pem' );
+	if (fs.existsSync( '/ssl/privatekey.pem' )) {
+		var privateKey = fs.readFileSync( '/ssl/privatekey.pem' );
+	}
 } catch (error) {
 	console.log(error);
 }
 try {
-	var certificate = fs.readFileSync( '/ssl/certificate.pem' );
+	if (fs.existsSync( '/ssl/certificate.pem' )) {
+		var certificate = fs.readFileSync( '/ssl/certificate.pem' );
+	}
 } catch (error) {
 	console.log(error);
 }
@@ -94,9 +98,17 @@ if (privateKey && certificate) {
 	});
 }
 
+var allLocations = false;
 var prefetch = function () {
 	if (fs.existsSync(__base + apiConfig.allLocationsFile)) {
 		console.log('found allLocationsFile');
+
+		allLocations = JSONbig.parse(fs.readFileSync(__base + apiConfig.allLocationsFile));
+
+		if (allLocations) {
+			console.log('locationsLoaded: ' + allLocations.LocationList.StopLocation.length);
+		}
+
 	} else {
 		console.log('Get allLocationsFile from API');
 		request(
@@ -127,6 +139,11 @@ var prefetch = function () {
 					}, function (err, response, body) {
 						fs.writeFileSync(__base + apiConfig.allLocationsFile, body);
 						console.log('created allLocationsFile');
+						allLocations = JSONbig.parse(body);
+
+						if (allLocations) {
+							console.log('locationsLoaded: ' + body.LocationList.StopLocation.length);
+						}
 					});
 				}
 			}

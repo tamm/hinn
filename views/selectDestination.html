@@ -1,7 +1,12 @@
 <md-content layout-fill flex>
-    <md-button class="md-icon-button" aria-label="back" ng-click="closeDialog()">
-        <ng-md-icon icon="clear"></ng-md-icon>
-    </md-button>  
+    <md-toolbar layout="row">
+        <div class="md-toolbar-tools">
+            <md-button class="md-icon-button" aria-label="back" ng-click="closeDialog()">
+                <ng-md-icon icon="clear"></ng-md-icon>
+            </md-button>
+            <h3 flex>Traveling to</h3>
+        </div>
+    </md-toolbar>
 
 
     <form layout-padding layout="row" ng-submit="searchLocations()">
@@ -15,7 +20,7 @@
     </form>
 
     <div ng-if="recentLocations">
-    
+
         <h5 layout-padding>Recent Destinations</h5>
 
         <md-list>

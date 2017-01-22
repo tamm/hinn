@@ -6,7 +6,7 @@
                         <h3 flex>Traveling from</h3>
                         <md-button class="md-icon-button" aria-label="back" ng-click="openSelectOrigin()">
                             <ng-md-icon icon="search"></ng-md-icon>
-                        </md-button>  
+                        </md-button>
                     </div>
                 </md-toolbar>
                 <md-content flex>
@@ -19,7 +19,7 @@
                     </md-list>
 
                     <div ng-if="recentLocations">
-    
+
                         <h5 layout-padding>Recent Destinations</h5>
 
                         <md-list>
@@ -39,12 +39,13 @@
                 <md-toolbar layout="row">
                     <div class="md-toolbar-tools">
                         <md-button class="md-icon-button" aria-label="back" ng-click="removeOrigin()">
-                            <ng-md-icon icon="flight_takeoff"></ng-md-icon>
-                        </md-button>  
-                        <h3 flex>{{ origin.name }}</h3>
+                            <ng-md-icon icon="arrow_back"></ng-md-icon>
+                        </md-button>
+                        <h3 flex ng-click="removeOrigin()">{{ origin.name }}</h3>
                         <md-button class="md-icon-button" aria-label="back" ng-click="openSelectDestination()">
-                            <ng-md-icon icon="flight_land"></ng-md-icon>
-                        </md-button>  
+                            To
+                        </md-button>
+                        <h3 flex ng-click="openSelectDestination()" ng-if="destination">{{ destination.name }}</h3>
                     </div>
                 </md-toolbar>
                 <md-content flex>
@@ -53,7 +54,7 @@
                         <table class="departureBoard">
                             <tr>
                                 <th>Linje</th>
-                                <th>Plats</th>
+                                <th ng-if="showTrack">Plats</th>
                                 <th>Riktning</th>
                                 <th colspan="4">Nästa avgång</th>
                             </tr>
@@ -66,8 +67,8 @@
                                         <span>{{ departureBoardLine.departures[0].sname }}</span>
                                     </div>
                                 </td>
-                                <td align="center">{{ departureBoardLine.departures[0].track }}</td>
-                                
+                                <td align="center" ng-if="showTrack">{{ departureBoardLine.departures[0].track }}</td>
+
                                 <td ng-if="!departureBoardLine.departures[0].directionLine2" flex>
                                     {{ departureBoardLine.departures[0].directionLine1 }}
                                 </td>
@@ -90,17 +91,17 @@
  -->
                          </table>
 
-                        <div layout-padding>
+<!--                         <div layout-padding>
                             <p><small>Current average delays: {{departureBoardAverageDelay}}</small></p>
                             <p><small>Total delay in minutes for this board: {{departureBoardTotalDelay}}</small></p>
                         </div>
-
+ -->
                         <p align="center" ng-if="destination">
                             <md-button class="md-icon-button" aria-label="back" ng-click="removeDestination()">
                                 <ng-md-icon icon="clear"></ng-md-icon>
-                            </md-button>  
+                            </md-button>
                         </p>
-                    </md-list> 
+                    </md-list>
 
                 </md-content>
             </main>
@@ -110,13 +111,14 @@
                     <div class="md-toolbar-tools">
                         <md-button class="md-icon-button" aria-label="back" ng-click="removeDeparture()">
                             <ng-md-icon icon="arrow_back"></ng-md-icon>
-                        </md-button>  
+                        </md-button>
                         <h3 flex>
                             <span ng-if="departure.departures[0].showIcon">
                                 <ng-md-icon icon="{{ departure.departures[0].icon }}"></ng-md-icon>
                             </span>
                             {{ departure.departures[0].name }} {{ departure.departures[0].direction }}
                         </h3>
+                        <md-button href="https://www.google.com/maps/preview/@{{departureLocation.lat}},{{departureLocation.lon}},17z">Show on map</md-button>
                     </div>
                 </md-toolbar>
                 <md-content flex>
@@ -138,7 +140,7 @@
                                     </div>
                                 </td>
                                 <td align="center">{{ departure.track }}</td>
-                                
+
                                 <td ng-if="!departure.directionLine2" flex>
                                     {{ departure.directionLine1 }}
                                 </td>
@@ -163,7 +165,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>Avgår</th>                                
+                                <th>Avgår</th>
                             </tr>
                             <tr ng-repeat="departure in departure.departures" ng-if="departure.rt">
                                 <td layout-padding colspan="4">
@@ -184,7 +186,7 @@
                                 </td>
                             </tr>
                         </table>
-                    </md-list> 
+                    </md-list>
 
                 </md-content>
             </main>
