@@ -185,7 +185,7 @@ var ngModule = angular.module('oauth2', [
       					var token = OAuthToken.getToken();
       					if (token) {
       						resolve(token);
-      					} else {
+      					} else {
       						reject('no token found');
       					}
       				});
