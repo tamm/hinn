@@ -5,7 +5,8 @@ var rename = require('gulp-rename');
 var watch = require('gulp-watch');
 var plumber = require('gulp-plumber');
 
-gulp.task('default', ['build', 'watch']);
+gulp.task('default', ['build']);
+gulp.task('watch', ['build', 'watch']);
 gulp.task('build', ['compress', 'compress-angular']);
 
 
