@@ -16,7 +16,7 @@ var requiredKeys = [
 var debug = function (message) {
     console.log(message);
     var debuginfo = document.createElement('div');
-    debuginfo.innerHtml = new Date() + ': ' + message;
+    debuginfo.innerHTML = new Date() + ': ' + message;
     document.getElementById('debug').appendChild(debuginfo);
 };
 
