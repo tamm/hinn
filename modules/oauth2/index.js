@@ -13,6 +13,13 @@ var requiredKeys = [
   'revokePath'
 ];
 
+var debug = function (message) {
+    console.log(message);
+    var debuginfo = document.createElement('div');
+    debuginfo.innerHtml = new Date() + ': ' + message;
+    document.getElementById('debug').appendChild(debuginfo);
+};
+
 var ngModule = angular.module('oauth2', [
 		'ngCookies'
 	])
@@ -23,6 +30,7 @@ var ngModule = angular.module('oauth2', [
 	  return {
 	    request: function(config) {
 	      config.headers = config.headers || {};
+	      debug('request interceptor', config);
 
 	      // Inject `Authorization` header.
 	      if (!config.headers.hasOwnProperty('Authorization') && OAuthToken.getAuthorizationHeader()) {
@@ -179,8 +187,10 @@ var ngModule = angular.module('oauth2', [
 		        });
       		} else if (config.clientKey && config.clientSecret) {
 
+	      		debug('check if we have a valid token already');
       			// check if we have a valid token already, or need a new one
       			if (OAuthToken.isTokenValid()) {
+	      			debug('we have a valid token');
       				return $q(function(resolve, reject){
       					var token = OAuthToken.getToken();
       					if (token) {
@@ -190,6 +200,7 @@ var ngModule = angular.module('oauth2', [
       					}
       				});
       			}
+      			debug('we do not have a valid token');
 
 		        data = angular.extend({
 		          grant_type: 'client_credentials',
