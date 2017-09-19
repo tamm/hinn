@@ -95,10 +95,7 @@
         <div class="loadingVeil" ng-class="{revealPage: !loading}">
             <div class="loadingText" ng-bind="loadingText"></div>
 
-            <div class="debug">
-                <div ng-repeat="message in debugMessages">
-                    <b>{message.time}</b> <span>{message.line}</span>
-                </div>
+            <div id="debug">
             </div>
         </div>
 
