@@ -16,7 +16,7 @@ var requiredKeys = [
 var ngModule = angular.module('oauth2', [
 		'ngCookies'
 	])
-	.config(['$httpProvider', function($httpProvider) {  
+	.config(['$httpProvider', function($httpProvider) {
 		$httpProvider.interceptors.push('oauthInterceptor');
 	}])
 	.factory('oauthInterceptor', ['$q', '$rootScope', 'OAuthToken', function oauthInterceptor($q, $rootScope, OAuthToken) {
@@ -401,7 +401,7 @@ var ngModule = angular.module('oauth2', [
 	      OAuthToken.removeToken = function() {
 	        return $cookies.remove(config.name, config.options);
 	      }
-	    
+
 
 	    return OAuthToken;
 	  }];
