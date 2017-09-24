@@ -223,7 +223,9 @@ var ngModule = angular.module('oauth2', [
 		        }, options);
 
 		        return $q(function(resolve, reject){
+		        	debug('get access_token');
 		        	$http.post(config.baseUrl + config.grantPath, data, options).then(function(response) {
+		        		debug('received access_token');
 			          OAuthToken.setToken(response.data);
 
 			          resolve(response.data);
@@ -359,6 +361,7 @@ var ngModule = angular.module('oauth2', [
 
 	      OAuthToken.getToken = function() {
 	        var token = $cookies.getObject(config.name);
+	        if(token){console.log(token.access_token, token.savedAt + (token.expires_in * 1000),token.savedAt + (token.expires_in * 1000) > new Date().getTime());}
 	        return this.validateToken(token) ? token : false;
 	      };
 
