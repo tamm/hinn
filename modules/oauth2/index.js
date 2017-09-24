@@ -60,12 +60,12 @@ var ngModule = angular.module('oauth2', [
 	      }
 
 	      // Special case for Vasttrafik API rejections
-          if (-1 === rejection.status
-          	// && rejection.config.grant_type === 'client_credentials'
+          if (-1 === rejection.status &&
+          	rejection.config.grant_type === 'client_credentials'
           	) {
           	// refresh token if client credentials
-          	rejection.data = {error:'invalid_token'}
-	        $rootScope.$emit('oauth:error', rejection);
+          	rejection.data = {error:'invalid_token'};
+	        	$rootScope.$emit('oauth:error', rejection);
           }
 
 	      return $q.reject(rejection);
@@ -222,11 +222,16 @@ var ngModule = angular.module('oauth2', [
 		          }
 		        }, options);
 
-		        return $http.post(config.baseUrl + config.grantPath, data, options).then(function(response) {
-		          OAuthToken.setToken(response.data);
+		        return $q(function(resolve, reject){
+		        	$http.post(config.baseUrl + config.grantPath, data, options).then(function(response) {
+			          OAuthToken.setToken(response.data);
 
-		          return response.data;
-		        });      		}
+			          resolve(response.data);
+      				}, function (response) {
+      					reject(response);
+      				});
+		        });
+		      }
 	      };
 
 	      /**
@@ -353,20 +358,20 @@ var ngModule = angular.module('oauth2', [
 	       */
 
 	      OAuthToken.getToken = function() {
-	        return $cookies.getObject(config.name);
-	      }
+	        var token = $cookies.getObject(config.name);
+	        return this.validateToken(token) ? token : false;
+	      };
 
 	      /**
 	       * Get token.
 	       */
 
+	      OAuthToken.validateToken = function(token) {
+	      	return token && token.savedAt + (token.expires_in * 1000) > new Date().getTime();
+	      };
+
 	      OAuthToken.isTokenValid = function() {
-	      	var token = this.getToken(),
-	      		isValid = false;
-	      	if (token && token.savedAt + (token.expires_in * 1000) > new Date().getTime()) {
-	      		isValid = true;
-	      	}
-	        return isValid;
+	        return this.validateToken(this.getToken()) ? true : false;
 	      };
 
 	      /**
