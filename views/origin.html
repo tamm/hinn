@@ -56,7 +56,7 @@
                                 <th>Linje</th>
                                 <th ng-if="showTrack">Plats</th>
                                 <th>Riktning</th>
-                                <th colspan="4">Nästa avgång</th>
+                                <th colspan="4">Avgår om</th>
                             </tr>
                             <tr ng-repeat="departureBoardLine in departureBoardLines" ng-click="selectDeparture(departureBoardLine)" ng-if="!destination || departureBoardLine.inTripLegs">
                                 <td align="center" ng-if="departureBoardLine.departures[0].showIcon">
