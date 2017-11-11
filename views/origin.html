@@ -12,9 +12,9 @@
                 <md-content flex>
                     <md-list ng-cloak>
                         <md-list-item ng-repeat="stop in nearbyStops track by $index" class="noright" ng-click="selectOrigin(stop)">
-                            <ng-md-icon ng-if="!stop.chosen || stop.chosen.length < 1" icon="location_on" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
-                            <ng-md-icon ng-if="stop.chosen.length > 0" icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
-                            <p>{{ stop.name }}</p>
+                            <ng-md-icon ng-if="!stop.recentLocation" icon="location_on" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
+                            <ng-md-icon ng-if="stop.recentLocation" icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
+                            <p>{{ stop.name }} <small ng-if="location.distance">({{ location.distance }})</small></p>
                         </md-list-item>
                     </md-list>
 
@@ -25,7 +25,7 @@
                         <md-list>
                             <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in recentLocations | limitTo: 5 track by $index">
                                 <ng-md-icon icon="favorite_border" ng-class="{'md-avatar-icon': true}"></ng-md-icon>
-                                <p>{{location.name}} <small>({{ location.choiceDistance }})</small></p>
+                                <p>{{location.name}}</p>
                             </md-list-item>
                         </md-list>
 

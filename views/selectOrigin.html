@@ -8,7 +8,7 @@
         </div>
     </md-toolbar>
 
-    <form layout-padding layout="row" ng-submit="searchLocations()">
+    <form class="search-location-form" layout-padding layout="row" ng-submit="searchLocations()">
         <md-input-container flex class="md-icon-right md-block">
             <label>Destination search</label>
             <input ng-model="searchQuery" type="text">
@@ -18,7 +18,7 @@
         </md-button>
     </form>
 
-    <div ng-if="recentLocations">
+    <div ng-if="recentLocations && !locationSearchResult">
 
         <h5 layout-padding>Recent Destinations</h5>
 
@@ -32,9 +32,13 @@
 
     </div>
 
-    <md-list>
-        <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in locations.LocationList.StopLocation">
-            {{location.name}}
-        </md-list-item>
-    </md-list>
+    <div ng-if="locationSearchResult">
+        <h5 layout-padding>Search result</h5>
+
+        <md-list>
+            <md-list-item ng-click="selectOrigin(location)" ng-repeat="location in locationSearchResult">
+                {{location.name}} <ng-md-icon icon="favorite_border" ng-if="location.recentLocation"></ng-md-icon>
+            </md-list-item>
+        </md-list>
+    </div>
 </md-content>
