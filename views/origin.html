@@ -118,8 +118,10 @@
                             </span>
                             {{ departure.departures[0].name }} {{ departure.departures[0].direction }}
                         </h3>
-                        <md-button href="https://www.google.com/maps/preview/@{{departureLocation.lat}},{{departureLocation.lon}},17z">Show on map</md-button>
-                    </div>
+                        <md-button href="https://www.google.com/maps/search/{{ departure.departures[0].stop }},17z">Show on map</md-button>
+
+<!--                         <md-button href="https://www.google.com/maps/preview/@{{departureLocation.lat}},{{departureLocation.lon}},17z">Show on map</md-button>
+ -->                    </div>
                 </md-toolbar>
                 <md-content flex>
 
@@ -196,8 +198,5 @@
                     <h3 flex>
                         <span>{{title}}</span>
                     </h3>
-                    <md-button class="md-icon-button" aria-label="More" ng-click="showInfo()">
-                        <ng-md-icon icon="info_outline"></ng-md-icon>
-                    </md-button>
                 </div>
             </md-toolbar>
