@@ -11,7 +11,7 @@ gulp.task('build', ['compress', 'compress-angular']);
 
 
 gulp.task('watch', function () {
-    // Endless stream mode 
+    // Endless stream mode
     return watch(['lib/*.js', 'modules/**/index.js', 'views/*.html'], function (events, done) {
       gulp.start('compress');
     });
@@ -60,7 +60,15 @@ gulp.task('compress', function() {
   ])
     .pipe(plumber())
     .pipe(minify())
-    .pipe(gulp.dest('build'));});
+    .pipe(gulp.dest('build'));
+
+  gulp.src([
+  'manifest.json'
+  ])
+    .pipe(plumber())
+    .pipe(minify())
+    .pipe(gulp.dest('build'));
+});
 
 gulp.task('compress-angular', function() {
 // angular
